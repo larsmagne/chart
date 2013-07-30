@@ -667,6 +667,14 @@ etc.
 </ul>
 
 
+<h3>Output data</h3>
+
+To allow interacting with the data from Javascript, Chart can output
+the data it plots in JSON format.  To do that, call <tt>new
+chart()</tt> with the optional <tt>jsonpart</tt> parameter set.
+
+
+
 <h3>Bugs</h3>
 
 <p>Chart hasn't been optimized for speed at all.  There are probably
@@ -715,7 +723,7 @@ right locale.
 
 <h3>Contact</h3>
 
-Chart is &copy; 1999, 2000, 2001 Lars Magne Ingebrigtsen.
+Chart is &copy; 1999-2013 Lars Magne Ingebrigtsen.
 
 <p>Chart is released under the <a href="COPYING">GNU General Public
 License</a>.  This means that Chart is <a
@@ -736,7 +744,7 @@ page is the documentation to Chart and is covered by the same license.
       <small>
 <!-- Created: Sun Sep  4 19:27:03 CET 1999 -->
 <!-- hhmts start -->
-2001-11-08 21:44:14
+2013-07-29 21:44:14
 <!-- hhmts end -->
       </small>
     </div>
