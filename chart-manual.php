@@ -20,18 +20,18 @@ function examplena ($file) {
 
 <p><? example("example31"); ?><br>
 
-Chart is a PHP4 library for generating charts--two dimensional
-representations of data sets.  This is the manual for Chart 0.7.
+Chart is a PHP library for generating charts--two dimensional
+representations of data sets.
 
 <p>Chart is covered by the <a href="COPYING">GNU GPL</a> and
 is written by <a href="http://quimby.gnus.org/lmi/">Lars Magne
 Ingebrigtsen</a>.  Development of this library was paid for by <a
-href="http://www.netfonds.no/">Net Fonds ASA</a>.
+href="http://www.netfonds.no/">Netfonds Bank AS</a>.
 
 <h3>Download</h3>
 
-<a href="chart-0.7.tar.gz">A tarred and gzipped package of the
-latest version of the library</a>.
+<a href="https://github.com/larsmagne/chart">Get the source from
+GitHub</a>.
 
 <h3>A super-quick example</h3>
 
@@ -106,15 +106,11 @@ something similar.
 the charts.
 
 
-<h3>PHP4</h3>
+<h3>PHP</h3>
 
-Chart needs PHP4.  PHP3 has a much too weak object model to allow
-working with a non-trivial set of objects in a sensible manner.  PHP4
-can be gotten from <a href="http://www.php.net/">the PHP web site</a>.
-The only non-standard library Chart relies on is <a
-href="rgb.phps">RGB</a>, which makes it much easier to deal with
-colors.  RGB is included in the <a href="chart-0.7.tar.gz">Chart
-package</a>.
+Chart needs PHP4 or 5.  The only non-standard library Chart relies on
+is <a href="rgb.phps">RGB</a>, which makes it much easier to deal with
+colors.  RGB is included in the Chart package.
 
 
 <h3>Function reference</h3>
