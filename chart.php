@@ -18,13 +18,13 @@
 
 require('rgb.php');
 
-// The following variables should be edited to fit your 
+// The following variables should be edited to fit your
 // installation.
 
 // If debugging is switched on, caching is switched off.
 $chart_debug = false;
 
-// The directory where Chart will store cached images. 
+// The directory where Chart will store cached images.
 // Make sure this exists.
 $chart_cache_directory = "/var/tmp/cache";
 
@@ -65,13 +65,13 @@ class chart {
   var $output_x_size = false, $output_y_size;
   var $plots = array();
   var $image;
-  var $left_margin = 30, $right_margin = 10, 
+  var $left_margin = 30, $right_margin = 10,
     $top_margin = 20, $bottom_margin = 21;
   var $margin_color = "white";
   var $border_color = "black", $border_width = 1;
   var $title_text = array(), $title_where = array(), $title_color = array(),
     $title_auto_y = 0;
-  var $legends = array(), $legend_background_color = "white", 
+  var $legends = array(), $legend_background_color = "white",
     $legend_margin = 8, $legend_border_color = "black";
   var $legend_placement = "r"; // left or right
   var $legend_text_alignment = "l";
@@ -108,19 +108,19 @@ class chart {
 
   function y_point ($yoff, $height, $ymin, $ymax, $y) {
     if ($this->logarithmic_p) {
-      if ($ymax - $ymin > 2) 
+      if ($ymax - $ymin > 2)
 	$c = 1;
 
       if ($y == 0)
-	return $yoff + $height + (alog($ymin, $c) / 
+	return $yoff + $height + (alog($ymin, $c) /
 				  (alog($ymax, $c) - alog($ymin, $c))) *
 				    $height;
       else
-	return $yoff + $height - ((alog($y, $c)*1.0 - alog($ymin, $c)) / 
-				  (alog($ymax, $c) - alog($ymin, $c)) * 
+	return $yoff + $height - ((alog($y, $c)*1.0 - alog($ymin, $c)) /
+				  (alog($ymax, $c) - alog($ymin, $c)) *
 				  $height);
     } else
-      return $yoff + $height - (($y*1.0 - $ymin) / 
+      return $yoff + $height - (($y*1.0 - $ymin) /
 				($ymax - $ymin) * $height);
   }
 
@@ -142,7 +142,7 @@ class chart {
     $this->expired = $expired;
   }
 
-  function set_margins ($left = 30, $right = 10, 
+  function set_margins ($left = 30, $right = 10,
 			$top = 20, $bottom = 23) {
     $this->left_margin = $left;
     $this->right_margin = $right;
@@ -206,12 +206,12 @@ class chart {
     global $chart_cache_directory;
     $file = $chart_cache_directory . "/" . $file;
     // There probably is a security problem hereabouts.  Just
-    // transforming all ".."'s into "__" and "//"'s into "/_" will 
+    // transforming all ".."'s into "__" and "//"'s into "/_" will
     // probably help, though.
-    while (ereg("[.][.]", $file)) 
-      $file = ereg_replace("[.][.]", "__", $file);
-    while (ereg("//", $file)) 
-      $file = ereg_replace("//", "/_", $file);
+    while (preg_match("/\.\./", $file))
+      $file = preg_replace("/\.\./", "__", $file);
+    while (preg_match("/\/\//", $file))
+      $file = preg_replace("/\/\//", "/_", $file);
     $this->cache = $file;
   }
 
@@ -228,7 +228,7 @@ class chart {
 		    $this->headers();
 		    fpassthru($file);
 		    exit;
-		} 
+		}
 	    } else {
 		// The idea here is to obtain a lock on the file to be
 		// written before starting to write it.  That way we
@@ -261,7 +261,7 @@ class chart {
 		    if (file_exists($this->lockfile))
 		      unlink($this->lockfile);
 		} else {
-		    // We got the lock, so we break from the loop and 
+		    // We got the lock, so we break from the loop and
 		    // return, and generate the chart ourselves.
 		    $this->lockfd = $lockfd;
 		    break;
@@ -271,7 +271,7 @@ class chart {
     }
     return false;
   }
-  
+
   function put_cache ($image) {
     global $chart_use_png;
     $file = $this->cache;
@@ -285,10 +285,10 @@ class chart {
       imagepng($image, "$file.tmp");
     else
       imagegif($image, "$file.tmp");
-    if (file_exists("$file.tmp")) 
+    if (file_exists("$file.tmp"))
       rename("$file.tmp", "$file");
     imagedestroy($image);
-    
+
     // Remove the lock file.
     if ($this->lockfd != -1) {
 	fclose($this->lockfd);
@@ -304,10 +304,10 @@ class chart {
       $this->headers();
       fpassthru($file);
       exit;
-    } 
+    }
     return true;
   }
-  
+
   function make_directory ($file) {
     while (! (file_exists($file))) {
       $dirs[] = $file;
@@ -317,7 +317,7 @@ class chart {
       if (strlen(basename($dirs[$i])) > 256) {
 	echo "Too long file name";
 	exit;
-      } 
+      }
       if (! file_exists($dirs[$i]))
 	@mkdir($dirs[$i], 0777);
     }
@@ -420,7 +420,7 @@ class chart {
     if (! $im)
       exit;
     $this->image = $im;
-    
+
     if ($this->background_from_color) {
       $cs = rgb_allocate_colors($im, $this->background_from_color,
 				$this->background_to_color,
@@ -442,12 +442,12 @@ class chart {
 
     if (is_array($this->y_min) || is_array($this->y_max)) {
       list ($ymin, $ymax) = $this->get_extrema(1);
-      // If we're doing a logarithmic plot that just about touches 0, then 
+      // If we're doing a logarithmic plot that just about touches 0, then
       // it looks really ugly if we extend the chart below 0.  So don't
       // do that, then.
       if ($this->logarithmic_p && $ymin < 1)
 	$grace = 0;
-      else 
+      else
 	$grace = ($ymax-$ymin)*0.01;
       $ymin -= $grace;
       $ymax += $grace;
@@ -466,9 +466,9 @@ class chart {
       $ymax *= 1.01;
       $ymin *= 0.99;
     }
-    if ($xmax == $xmin) 
+    if ($xmax == $xmin)
       $xmax++;
-    if ($ymax == $ymin) 
+    if ($ymax == $ymin)
       $ymax++;
 
     $xoff = $this->left_margin;
@@ -483,11 +483,11 @@ class chart {
       imagefilledrectangle($im, 0, 0, $xs, $this->top_margin-1, $margin);
       imagefilledrectangle($im, $xs-$this->right_margin+1, $this->top_margin-1,
 			   $xs, $ys, $margin);
-      imagefilledrectangle($im, 0, $ys-$this->bottom_margin+1, $xs, $ys, 
+      imagefilledrectangle($im, 0, $ys-$this->bottom_margin+1, $xs, $ys,
 			   $margin);
       imagefilledrectangle($im, 0, 0, $this->left_margin-1, $ys, $margin);
     }
-    
+
     // Go through all the plots and stroke them.
     if ($callback != false) {
       if ($this->grid_position == 0)
@@ -515,22 +515,22 @@ class chart {
       imagefilledrectangle($im, 0, 0, $xs, $this->top_margin-1, $margin);
       imagefilledrectangle($im, $xs-$this->right_margin+1, $this->top_margin-1,
 			   $xs, $ys, $margin);
-      imagefilledrectangle($im, 0, $ys-$this->bottom_margin+1, $xs, $ys, 
+      imagefilledrectangle($im, 0, $ys-$this->bottom_margin+1, $xs, $ys,
 			   $margin);
       imagefilledrectangle($im, 0, 0, $this->left_margin-1, $ys, $margin);
     }
-    
+
     if (! $this->frame) {
       if ($this->border_color) {
-	imageline($im, $this->left_margin, $this->top_margin, 
+	imageline($im, $this->left_margin, $this->top_margin,
 		  $this->left_margin, $ys-$this->bottom_margin+3, $axes_color);
 	imageline($im, $this->left_margin-3, $ys-$this->bottom_margin,
 		  $xs-$this->right_margin, $ys-$this->bottom_margin,
 		  $axes_color);
       }
     } else {
-      imagerectangle($im, $this->left_margin, $this->top_margin, 
-		     $xs-$this->right_margin, $ys-$this->bottom_margin, 
+      imagerectangle($im, $this->left_margin, $this->top_margin,
+		     $xs-$this->right_margin, $ys-$this->bottom_margin,
 		     $this->allocate_color($this->border_color));
     }
 
@@ -547,7 +547,7 @@ class chart {
     // Draw the labels, if any.
     if ($this->y_label) {
       if ($this->font_type == "type1") {
-	imagepstext ($im, $this->y_label, $this->font, $this->font_size, 
+	imagepstext ($im, $this->y_label, $this->font, $this->font_size,
 		     $this->allocate_color($title_color),
 		     $this->allocate_color("white"),
 		     15, (int)($ys/2+$this->string_pixels($this->y_label)/2),
@@ -558,14 +558,14 @@ class chart {
 		      $this->y_label, $title_color);
       }
     }
-    if ($this->x_label) 
+    if ($this->x_label)
       imagestring($im, $this->font,
 		  $xs/2-$this->string_pixels($this->x_label)/2,
 		  $ys-20, $this->x_label, $title_color);
 
     // Draw the boorder.
-    if ($this->border_color) 
-      imagerectangle($im, 0, 0, $xs-1, $ys-1, 
+    if ($this->border_color)
+      imagerectangle($im, 0, 0, $xs-1, $ys-1,
 		     $this->allocate_color($this->border_color));
 
     // Draw the title.
@@ -575,30 +575,30 @@ class chart {
 	if ($tx == "noval") {
 	  if (!strcmp($this->title_where[$i], "center")) {
 	    list ($llx, $lly, $urx, $ury) = imagepsbbox($this->title_text[$i],
-							$this->font, 
+							$this->font,
 							$this->font_size);
 	    $tx = $xs/2 - ($urx-$llx)/2;
 	    if ($this->title_auto_y)
 	      $ty = $ury-$lly + 2;
 	    else
 	      $ty = 15;
-	  } else 
+	  } else
 	    $tx = 0;
 	}
 
-	imagepstext ($im, $this->title_text[$i], $this->font, 
-		     $this->font_size, 
+	imagepstext ($im, $this->title_text[$i], $this->font,
+		     $this->font_size,
 		     $this->allocate_color($this->title_color[$i]),
 		     $this->allocate_color("white"),
 		     (int)$tx, (int)$ty,
 		     0, 0, 0, 16);
       } elseif ($this->font_type == "internal") {
-	if (!strcmp($this->title_where[$i], "center")) 
+	if (!strcmp($this->title_where[$i], "center"))
 	  $tx = $xs/2 - $this->string_pixels($this->title_text[$i])/2;
-	else 
+	else
 	  $tx = 0;
-	
-	imagestring($im, $this->font, $tx, 5, $this->title_text[$i], 
+
+	imagestring($im, $this->font, $tx, 5, $this->title_text[$i],
 		    $this->allocate_color($this->title_color[$i]));
       }
     }
@@ -623,14 +623,14 @@ class chart {
       // Draw a box behind the legend.
       if ($this->legend_background_color) {
 	imagefilledrectangle($im, $x-$lmargin, $y-$lmargin,
-			     $x+$lmargin+$maxlength, 
+			     $x+$lmargin+$maxlength,
 			     $y+$lmargin+
 			     (($this->font_size+2)*sizeof($this->legends)),
 			     $this->allocate_color($this->legend_background_color));
       }
       if ($this->legend_border_color) {
 	imagerectangle($im, $x-$lmargin, $y-$lmargin,
-		       $x+$lmargin+$maxlength, 
+		       $x+$lmargin+$maxlength,
 		       $y+$lmargin+
 		       (($this->font_size+2)*sizeof($this->legends)),
 		       $this->allocate_color($this->legend_border_color));
@@ -638,10 +638,10 @@ class chart {
       foreach ($this->legends as $legend) {
 	if ($this->legend_text_alignment == "l")
 	  $this->draw_text($legend[0], $legend[1], $x, $y);
-	else 
-	  $this->draw_text($legend[0], $legend[1], 
+	else
+	  $this->draw_text($legend[0], $legend[1],
 			   $x + $maxlength -
-			   $this->real_string_pixels($legend[0]), 
+			   $this->real_string_pixels($legend[0]),
 			   $y);
 	$y += $this->font_size+2;
       }
@@ -677,7 +677,7 @@ class chart {
       $this->output_data_file();
 
     // This statement usually doesn't return.
-    if ($this->cache) 
+    if ($this->cache)
       $this->put_cache($im);
 
     $this->headers();
@@ -720,7 +720,7 @@ class chart {
 	$value = sprintf("%.2f", $value);
       if ($additional)
 	$extra = ",\"" . $additional[$index] . "\"";
-      fwrite($fp, "[" . $x . ",\"" . $value . "\",\"" . 
+      fwrite($fp, "[" . $x . ",\"" . $value . "\",\"" .
 	     date("d.m.Y", $this->datadatetotime($elem[1])) .
 	     "\"" . $extra . "]");
       $index++;
@@ -744,7 +744,7 @@ class chart {
   }
 
   function datadatetotime ($datatime) {
-    if (ereg ("([0-9]{4})([0-9]{2})([0-9]{2})", $datatime, $regs)) { 
+    if (preg_match ("/[0-9]{4})([0-9]{2})([0-9]{2})/", $datatime, $regs)) {
       return mktime (1, 0, 0,
 		     $regs[2], $regs[3], $regs[1]);
     }
@@ -791,11 +791,11 @@ class chart {
     $width = $xs - $this->left_margin - $this->right_margin;
     $height = $ys - $this->top_margin - $this->bottom_margin;
     $axes_color = $this->allocate_color($this->axes_color);
-    if ($this->do_draw_grid) 
+    if ($this->do_draw_grid)
       $this->draw_y_axis($im, $ymin, $ymax, $xs, $ys, $height, $yoff, false,
 			 $axes_color);
     $this->draw_marked_grid($im, $ymin, $ymax, $xs, $ys, $height, $yoff);
-    if ($this->do_draw_grid) 
+    if ($this->do_draw_grid)
       $this->draw_x_axis($im, $xmin, $xmax, $xs, $ys, $width, $xoff, false,
 			 $axes_color);
   }
@@ -843,7 +843,7 @@ class chart {
 
 	// If the start/end positions are near "pretty"
 	// numbers, then we round up/down.
-	if ((! $start%$step) || (($start%$step) / ($end-$start)) > 0.01) 
+	if ((! $start%$step) || (($start%$step) / ($end-$start)) > 0.01)
 	  $kstart = $start;
 	else
 	  $kstart = $start-($start%$step);
@@ -859,10 +859,10 @@ class chart {
 
 	for ($hour = $kstart; $hour <= $kend; $hour += $step) {
 	  $ticks[] = (($hour-$start)*$scale);
-	  if ($step == 3600 && $hour%3600 == 0) 
+	  if ($step == 3600 && $hour%3600 == 0)
 	    $tick_texts[] = (int)($hour/3600);
-	  else 
-	    $tick_texts[] = sprintf("%02d:%02d", 
+	  else
+	    $tick_texts[] = sprintf("%02d:%02d",
 				    (int)($hour/3600), ($hour%3600/60));
 	}
       } else if ($this->x_ticks_format == "price") {
@@ -884,7 +884,7 @@ class chart {
 
 	// If the start/end positions are near "pretty"
 	// numbers, then we round up/down.
-	if ((! $start%$step) || (($start%$step) / ($end-$start)) > 10000) 
+	if ((! $start%$step) || (($start%$step) / ($end-$start)) > 10000)
 	  $kstart = $start;
 	else
 	  $kstart = $start-($start%$step);
@@ -911,7 +911,7 @@ class chart {
 	$mlength = $this->month_length($month, $year);
 	$first = true;
 	for ($i = $start; $i < $end; $i++) {
-	  if ($mday == 1) 
+	  if ($mday == 1)
 	    $firsts[] = $i;
 	  if ($mday == 1 || $mday == 15) {
 	    if ($first) {
@@ -920,7 +920,7 @@ class chart {
 		$number_unsuitable = 1;
 	    }
 	    $mids[] = $i;
-	  } if ($wday == 1) 
+	  } if ($wday == 1)
 	    $mondays[] = $i;
 	  if ($month == 1 && $mday == 1)
 	    $first_januarys[] = $i;
@@ -947,7 +947,7 @@ class chart {
 	  $scale = 1;
 
 	if ($duration < 24) {
-	  for ($i = $start; $i<$end; $i++) 
+	  for ($i = $start; $i<$end; $i++)
 	    $dates[] = $i;
 	} elseif ($duration < 62) {
 	  $dates = $mondays;
@@ -969,7 +969,7 @@ class chart {
 	    /* The idea here is that we want to pick pleasing dates,
 	       but we also want to have them distributed non-evenly.
 	       That is, skip dates that aren't in the data set. */
-	    while (($tick_date = 
+	    while (($tick_date =
 		    $this->datadatetotime($this->x_ticks[$used_ticks_counter])/(24*60*60)) != 0 &&
 		   $tick_date <= $dates[$i]) {
 	      $used_ticks_counter++;
@@ -978,13 +978,13 @@ class chart {
 	  } else {
 	    $ticks[] = (($dates[$i]-$start)*$scale);
 	  }
-	  if (! $wdformat) 
+	  if (! $wdformat)
 	    $tick_texts[] = $this->shortnorwegiandate($dates[$i]*24*60*60);
 	  else {
-	    if ($this->x_ticks_format == "sdate") 
+	    if ($this->x_ticks_format == "sdate")
 	      $tick_texts[] = date("d.m", $dates[$i]*24*60*60);
 	    else
-	      $tick_texts[] = "Ma " . 
+	      $tick_texts[] = "Ma " .
 		$this->shortnorwegiandate($dates[$i]*24*60*60);
 	  }
 	}
@@ -1013,16 +1013,16 @@ class chart {
 		$text = $this->shortnorwegiandate
 		  ($this->datadatetotime($this->x_ticks[$x]));
 	      }	elseif (!strcmp($this->x_ticks_format, "sdate")) {
-		$text = 
+		$text =
 		  date("d.m", ($this->datadatetotime($this->x_ticks[$x])));
 	      } elseif (!strcmp($this->x_ticks_format, "time")) {
 		$text = $this->x_ticks["$x"];
 	        $text = substr($text, 0, 2) . ":" . substr($text, 2, 2);
 	      } elseif (!strcmp($this->x_ticks_format, "ctime")) {
 		$dtext = $text = date("m/d", $x);
-		if (isset($odtext) && $text != $odtext) 
-		  $text .= " " . date("G:i", $x); 
-		else 
+		if (isset($odtext) && $text != $odtext)
+		  $text .= " " . date("G:i", $x);
+		else
 		  $text= date("G:i", $x);
 		$odtext=$dtext;
 	      } elseif (!strcmp($this->x_ticks_format, "cdate")) {
@@ -1036,7 +1036,7 @@ class chart {
 	      $text = $x;
 	    }
 	    if ($this->font_type == "type1") {
-	      imagepstext($im, $text, $this->font, $this->font_size, 
+	      imagepstext($im, $text, $this->font, $this->font_size,
 			  $axes_color,
 			  $this->allocate_color("white"),
 			  (int)($xt-(strlen($text)*$this->font_size/4)+0),
@@ -1046,19 +1046,19 @@ class chart {
 	      imagestring($im, $this->font, $xt-(strlen($text)*6/2),
 			  $ys-$this->bottom_margin+5, $text, $axes_color);
 	    }
-	    imageline($im, $xt, $ys-$this->bottom_margin, 
+	    imageline($im, $xt, $ys-$this->bottom_margin,
 		      $xt, $ys-$this->bottom_margin+3, $axes_color);
 	  } else {
-	    imageline($im, $xt, $ys-$this->bottom_margin, 
+	    imageline($im, $xt, $ys-$this->bottom_margin,
 		      $xt, $ys-$this->bottom_margin+1, $axes_color);
 	  }
 	} else {
 	  if ($xt > $this->left_margin)
-	    imageline($im, $xt, $this->top_margin, 
+	    imageline($im, $xt, $this->top_margin,
 		      $xt, $ys-$this->bottom_margin-1, $grid_color);
 	}
       }
-    }      
+    }
   }
 
   function pleasing_numbers ($number, $series = 0, $minimum = 0) {
@@ -1081,13 +1081,13 @@ class chart {
 
   function draw_text ($string, $color, $x, $y) {
     if ($this->font_type == "type1") {
-      imagepstext($this->image, $string, $this->font, $this->font_size, 
+      imagepstext($this->image, $string, $this->font, $this->font_size,
 		  $this->allocate_color($color),
 		  $this->allocate_color($this->background_color),
-		  $x, $y+$this->font_size-2, 
+		  $x, $y+$this->font_size-2,
 		  0, 0, 0, 16);
     } elseif ($this->font_type == "internal") {
-      imagestring($this->image, $this->font, $x, $y, $string, 
+      imagestring($this->image, $this->font, $x, $y, $string,
 		  $this->allocate_color($color));
     }
   }
@@ -1096,7 +1096,7 @@ class chart {
 			$height, $yoff, $do_text, $axes_color) {
     if ($this->do_draw_y_axis == false && $do_text)
       return;
-    if (!(strcmp($this->axes, "y") || strcmp($this->axes, "xy"))) 
+    if (!(strcmp($this->axes, "y") || strcmp($this->axes, "xy")))
       return;
 
     $grid_color = $this->allocate_color($this->grid_color);
@@ -1112,10 +1112,10 @@ class chart {
       list($factor, $series) =
 	$this->pleasing_numbers(ceil($length/$ideal));
       /* If we get a too big factor here, we decrease it. */
-      if ($length / $factor < 2) 
+      if ($length / $factor < 2)
 	list($factor, $series) =
 	  $this->pleasing_numbers(ceil($length/$ideal) / 2);
-      
+
       list($valfactor) = $this->pleasing_numbers(($ymax-$ymin)/100, $series);
     }
     $spacing = abs($ticks[1] - $ticks[0]);
@@ -1126,78 +1126,78 @@ class chart {
 	break;
       }
     }
-    
+
     $iy = -1;
     $print_real = false;
-    
+
     for ($i = 0; $i < $length; $i += 1) {
       $y = $ticks[$i];
       $yt = $this->y_point($yoff, $height, $ymin, $ymax, $y);
-      
+
       if ($do_text) {
-	if ($i >= $offset) 
+	if ($i >= $offset)
 	  $iy++;
-	
+
 	if ((! ((int)($iy*1000)%($factor*1000))) && ($iy > -1)) {
-	  
+
 	  if (ceil($spacing*100) == 10 || ceil($spacing*100) == 20)
 	    $yst = sprintf("%.1f", $y);
 	  else if ($spacing < 1 && ! mod($spacing*10, 1))
 	    $yst = sprintf("%.1f", $y);
-	  elseif (abs($spacing) < 0.01) 
+	  elseif (abs($spacing) < 0.01)
 	    $yst = sprintf("%.3f", $y);
-	  elseif (abs($spacing) < 1) 
+	  elseif (abs($spacing) < 1)
 	    $yst = sprintf("%.2f", $y);
-	  elseif (!($spacing % 1000000000)) 
+	  elseif (!($spacing % 1000000000))
 	    $yst = sprintf("%dG",  $y / 1000000000);
-	  elseif (!($spacing % 1000000)) 
+	  elseif (!($spacing % 1000000))
 	    $yst = sprintf("%dM",  $y / 1000000);
 	  elseif (!($spacing % 1000))
 	    $yst = sprintf("%dk",  $y / 1000);
 	  elseif (! $whole)
 	    $yst = sprintf("%.1f", $y);
-	  else 
+	  else
 	    $yst = $y;
-	  
-	  if (strlen($yst) > 5) 
+
+	  if (strlen($yst) > 5)
 	    $yst = (int) $yst;
-	  
+
 	  if ($this->y_format == "percent")
 	    $yst .= "%";
-	  
+
 	  if (($y*10)%10)
 	    $whole = false;
-	  
+
 	  if ($this->font_type == "type1") {
-	    list ($llx, $lly, $urx, $ury) = 
+	    list ($llx, $lly, $urx, $ury) =
 	      imagepsbbox("$yst", $this->font, $this->font_size);
 	    // This is a filter to ween out any single pixel
 	    // differences in text width.
-	    $ww = ($urx-$llx); 
+	    $ww = ($urx-$llx);
 	    if ($prev_ww != $ww && abs($prev_ww-$ww) < 3)
 	      $ww = $prev_ww;
 	    else
 	      $prev_ww = $ww;
-	    imagepstext ($im, "$yst", $this->font, $this->font_size, 
+	    imagepstext ($im, "$yst", $this->font, $this->font_size,
 			 $axes_color,
 			 $this->allocate_color("white"),
-			 (int)($this->left_margin-6-$ww), 
-			 (int)($yt+4), 
+			 (int)($this->left_margin-6-$ww),
+			 (int)($yt+4),
 			 0, 0, 0, 16);
 	  } elseif ($this->font_type == "internal") {
 	    imagestring($im, $this->font,
 			$this->left_margin-3-strlen($yst)*6, $yt-7, $yst,
 			$axes_color);
 	  }
-	  imageline($im, $this->left_margin-3, $yt, 
+	  imageline($im, $this->left_margin-3, $yt,
 		    $this->left_margin, $yt, $axes_color);
 	} else {
-	  imageline($im, $this->left_margin-1, $yt, 
+	  imageline($im, $this->left_margin-1, $yt,
 		    $this->left_margin, $yt, $axes_color);
 	}
       } else {
 	// Draw the grid line.
-	imageline ($im, $this->left_margin+1, $yt, 
+	imageline ($im, $this->left_margin+1, $yt,
 		   $xs-$this->right_margin, $yt, $grid_color);
       }
     }
@@ -1207,15 +1207,15 @@ class chart {
     if ($this->marked_grid_color) {
       $y = $this->marked_grid_point;
       $yt = $this->y_point($yoff, $height, $ymin, $ymax, $y);
-      imageline ($im, $this->left_margin+1, $yt, 
-		 $xs-$this->right_margin, $yt, 
+      imageline ($im, $this->left_margin+1, $yt,
+		 $xs-$this->right_margin, $yt,
 		 $this->allocate_color($this->marked_grid_color));
     }
   }
 
   function real_string_pixels ($string) {
     if ($this->font_type == "type1") {
-      list ($llx, $lly, $urx, $ury) = 
+      list ($llx, $lly, $urx, $ury) =
 	imagepsbbox($string, $this->font, $this->font_size);
       return $urx-$llx;
     } else
@@ -1234,10 +1234,10 @@ class chart {
     $factor = 1000;
     $diff = abs($max-$min);
     list ($even) = $this->pleasing_numbers($diff/$height*10);
-    if ($whole) 
+    if ($whole)
       $even = max(1, $even);
 
-    if ($min < 0) 
+    if ($min < 0)
       $start = floor($min*$factor) + $even*$factor-(floor($min*$factor)%($even*$factor))
 	- $even*$factor;
     elseif ($min == 0)
@@ -1279,7 +1279,7 @@ class chart {
 
       if (! isset($max))
 	$max = $ma;
-      if (! isset($min)) 
+      if (! isset($min))
 	$min = $mi;
       if ($ma > $max)
 	$max = $ma;
@@ -1362,7 +1362,7 @@ class plot {
       if ((! is_string($arr[$j])) || (strcmp($arr[$j], "noplot"))) {
 	if (! isset($max))
 	  $max = $arr[$j];
-	if (! isset($min)) 
+	if (! isset($min))
 	  $min = $arr[$j];
 	if ($arr[$j] > $max)
 	  $max = $arr[$j];
@@ -1444,7 +1444,7 @@ class plot {
 	$h = $width+2;
       else
 	$h = $height+2;
-      if (ereg(",", $this->color)) {
+      if (preg_match("/,/", $this->color)) {
 	$gcolors = explode(",", $this->color);
 	for ($i = 0; $i < sizeof($gcolors) - 1; $i++)
 	  $gacolors[] = array($gcolors[$i], $gcolors[$i+1]);
@@ -1478,13 +1478,13 @@ class plot {
       $style = 14;
     elseif (!strcmp($style, "none"))
       $style = 16;
-    
+
     if ($end == 1 && $position_style == "last") {
       $y = $ycoords[0];
       $xt = $xoff + $width;
       $yt = $chart->y_point($yoff, $height, $ymin, $ymax, $y);
       if ($style == 11) {
-	imagepstext($im, 
+	imagepstext($im,
 		    $this->texts[0],
 		    $chart->font,
 		    $chart->font_size,
@@ -1497,33 +1497,33 @@ class plot {
 	imagearc($im, $xt, $yt, $circle_size, $circle_size, 0, 360, $color);
       }
       return($color);
-    } 
+    }
 
     for ($i = 0; $i < $end; $i++) {
       $y = $ycoords[$i];
 
       if ((! is_array($y) && ((! is_string($y)) || (strcmp($y, "noplot"))))) {
-	if ($this->dimension == 1) 
+	if ($this->dimension == 1)
 	  $x = $i;
-	else 
+	else
 	  $x = $this->coords[1][$i];
-	
+
 	$xt = $xoff + ($x - $xmin) / ($xmax - $xmin) * $width;
 	$yt = $chart->y_point($yoff, $height, $ymin, $ymax, $y);
 
 	if ($this->output_data)
 	  $output_data[$xt] = array($y, $chart->x_ticks[$i]);
-	
+
 	if (! isset($pxt))
 	  $pxt = $xt;
 	if (! isset($pyt))
 	  $pyt = $yt;
 
-	if ($style == 1) 
+	if ($style == 1)
 	  imageline($im, $xt, $yt, $xt, $yt, $color);
 	elseif ($style == 2) {
 	  if ($this->line_width > 1) {
-	    $this->thick_line($im, $pxt, $pyt, $xt, $yt, $color, 
+	    $this->thick_line($im, $pxt, $pyt, $xt, $yt, $color,
 			      $this->line_width);
 	  } else {
 	    imageline($im, $pxt, $pyt, $xt, $yt, $color);
@@ -1531,7 +1531,7 @@ class plot {
 	} elseif ($style == 3) {
 	  imageline($im, $xt, $yoff+$height, $xt, $yt, $color);
 	} elseif ($style == 12) {
-	  imageline($im, $xt, 
+	  imageline($im, $xt,
 		    $chart->y_point($yoff, $height, $ymin, $ymax, 0),
 		    $xt, $yt, $color);
 	} elseif ($style == 4) {
@@ -1547,7 +1547,7 @@ class plot {
 	    $poyt = $oyt;
 	  $oyt = $chart->y_point($yoff, $height, $ymin, $ymax,
 				 $this->coords[1][$i]);
-	  for ($j = $pxt; $j <= $xt; $j++) 
+	  for ($j = $pxt; $j <= $xt; $j++)
 	    imageline($im, $j, $oyt, $j, $yt, $color);
 	  $poyt = $oyt;
 	} elseif ($style == 7) {
@@ -1557,21 +1557,21 @@ class plot {
 	  imagefilledrectangle($im, $pxt, $yt, $xt, $yoff+$height, $color);
 	} elseif ($style == 8) {
 	  // gradient
-	
+
 	  // We plot down from the value to the bottom of the chart.
 	  // There might be several pixels width of stuff to be plotted,
 	  // so we first calculate the gradient of the top of the chart
 	  // between the two points.  So the top of the "gradient"
 	  // chart will resemble the "lines" chart, not the "square"
 	  // chart.
-	
+
 	  if ($xt == $pxt) {
 	    $b = 0;
 	  } else {
 	    $b = ($yt - $pyt) / ($xt - $pxt);
 	  }
 	  $a = $yt - $b * $xt;
-	
+
 	  for ($x = $pxt; $x <= $xt; $x++) {
 	    $firsty = $a + $b * $x;
 	    if ($gradient_updown == 0) {
@@ -1602,7 +1602,7 @@ class plot {
 	  }
 	} elseif ($style == 12) {
 	  // fillgradient
-	  
+
 	  if (! isset($poyt))
 	    $poyt = $oyt;
 	  $oyt = $chart->y_point($yoff, $height, $ymin, $ymax,
@@ -1663,16 +1663,16 @@ class plot {
 	} elseif ($style == 16) {
 	  // "None" style -- do nothing.  Called for side effect only.
 	}
-	
+
 	$pxt = $xt;
 	$pyt = $yt;
       } else if (is_array($y) && ($style == 13 || $style == 14)) {
 	// Candlesticks and high/low.
-	if ($this->dimension == 1) 
+	if ($this->dimension == 1)
 	  $x = $i;
-	else 
+	else
 	  $x = $this->coords[1][$i];
-	
+
 	$xt = $xoff + ($x - $xmin) / ($xmax - $xmin) * $width;
 
 	list ($open, $high, $low, $close) = $y;
@@ -1695,7 +1695,7 @@ class plot {
 	  }
 	}
       }
-      
+
     }
     if ($output_data) {
       $chart->output_data[] = $output_data;
@@ -1707,7 +1707,7 @@ class plot {
     return($color);
   }
 
-  function thick_line ($im, $start_x, $start_y, $end_x, $end_y, $color, 
+  function thick_line ($im, $start_x, $start_y, $end_x, $end_y, $color,
 		       $thickness) {
     if ($end_x - $start_x == 0)
       $b = 0;
