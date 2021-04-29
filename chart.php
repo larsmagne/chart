@@ -389,12 +389,12 @@ class chart {
       $plot->set_texts($texts);
     if ($param)
       $plot->set_param($param);
-    $this->plots[] = &$plot;
+    $this->plots[] = $plot;
     return $plot;
   }
 
   function splot ($plot) {
-    $this->plots[] = &$plot;
+    $this->plots[] = $plot;
   }
 
   function stroke ($callback = false) {
@@ -498,9 +498,9 @@ class chart {
       for ($i = 0; $i < sizeof($this->plots); $i++) {
 	if ($this->grid_position == $i)
 	  $this->draw_grid($xmin, $xmax, $ymin, $ymax);
-	$plot = &$this->plots[$i];
+	$plot = $this->plots[$i];
 	$plot->stroke($im, $xmin, $xmax, $ymin, $ymax,
-		      $xoff, $yoff, $width, $height, &$this);
+		      $xoff, $yoff, $width, $height, $this);
       }
     }
 
@@ -668,7 +668,7 @@ class chart {
     if ($this->final_callback) {
       $call = $this->final_callback;
       $call($im, $xmin, $xmax, $ymin, $ymax,
-	    $xoff, $yoff, $width, $height, &$this);
+	    $xoff, $yoff, $width, $height, $this);
       // The callback may have replaced the image.
       $im = $this->image;
     }
@@ -1374,7 +1374,7 @@ class plot {
   }
 
   function stroke ($im, $xmin, $xmax, $ymin, $ymax, $xoff, $yoff,
-		   $width, $height, &$chart) {
+		   $width, $height, $chart) {
     $color = rgb_allocate($im, $this->color);
     $style = $this->style;
     $param = $this->param;
@@ -1698,7 +1698,7 @@ class plot {
       
     }
     if ($output_data) {
-      $chart->output_data[] = &$output_data;
+      $chart->output_data[] = $output_data;
       $chart->ymin = $ymin;
       $chart->ymax = $ymax;
       $chart->yoff = $yoff;
