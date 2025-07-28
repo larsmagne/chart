@@ -184,7 +184,7 @@ class chart {
     }
   }
 
-  function chart ($x, $y, $cache = false, $jsonpart = false) {
+  function __construct ($x, $y, $cache = false, $jsonpart = false) {
     global $chart_debug;
     error_reporting(1);
     if ($jsonpart && $cache) {
@@ -195,7 +195,7 @@ class chart {
     }
     // If this image has already been cached, then we just spew
     // it out and exit.
-    if ($cache)
+    if (false && $cache)
       $this->get_cache($cache);
     // If not, we initialize this object and allow execution to continue.
     $this->x_size = $x;
@@ -208,10 +208,10 @@ class chart {
     // There probably is a security problem hereabouts.  Just
     // transforming all ".."'s into "__" and "//"'s into "/_" will 
     // probably help, though.
-    while (ereg("[.][.]", $file)) 
-      $file = ereg_replace("[.][.]", "__", $file);
-    while (ereg("//", $file)) 
-      $file = ereg_replace("//", "/_", $file);
+    while (preg_match("/[.][.]/", $file)) 
+      $file = preg_replace("/[.][.]/", "__", $file);
+    while (preg_match("/\\/\\//", $file)) 
+      $file = preg_replace("/\\/\\//", "/_", $file);
     $this->cache = $file;
   }
 
@@ -389,12 +389,12 @@ class chart {
       $plot->set_texts($texts);
     if ($param)
       $plot->set_param($param);
-    $this->plots[] = &$plot;
+    $this->plots[] = $plot;
     return $plot;
   }
 
   function splot ($plot) {
-    $this->plots[] = &$plot;
+    $this->plots[] = $plot;
   }
 
   function stroke ($callback = false) {
@@ -404,10 +404,17 @@ class chart {
 
     // Load the font for this chart.
     if ($this->font_type == "type1") {
-	$this->font = imagepsloadfont($this->font_name);
-	imagepsencodefont($this->font, $type1_font_encoding);
+      if (function_exists("imagepsloadfont")) {
+        $this->font = imagepsloadfont($this->font_name);
+        imagepsencodefont($this->font, $type1_font_encoding);
+      } else {
+        $this->font_type = "internal";
+      }
     } elseif ($this->font_type == "ttf") {
-	$this->font = imagettfloadfont($this->font_name);
+      if (function_exists("imagettfloadfont"))
+        $this->font = imagettfloadfont($this->font_name);
+      else
+        $this->font_type = "internal";
     } else {
 	$this->font = $this->font_name;
     }
@@ -498,9 +505,9 @@ class chart {
       for ($i = 0; $i < sizeof($this->plots); $i++) {
 	if ($this->grid_position == $i)
 	  $this->draw_grid($xmin, $xmax, $ymin, $ymax);
-	$plot = &$this->plots[$i];
+	$plot = $this->plots[$i];
 	$plot->stroke($im, $xmin, $xmax, $ymin, $ymax,
-		      $xoff, $yoff, $width, $height, &$this);
+		      $xoff, $yoff, $width, $height, $this);
       }
     }
 
@@ -668,7 +675,7 @@ class chart {
     if ($this->final_callback) {
       $call = $this->final_callback;
       $call($im, $xmin, $xmax, $ymin, $ymax,
-	    $xoff, $yoff, $width, $height, &$this);
+	    $xoff, $yoff, $width, $height, $this);
       // The callback may have replaced the image.
       $im = $this->image;
     }
@@ -744,7 +751,7 @@ class chart {
   }
 
   function datadatetotime ($datatime) {
-    if (ereg ("([0-9]{4})([0-9]{2})([0-9]{2})", $datatime, $regs)) { 
+    if (preg_match("/([0-9]{4})([0-9]{2})([0-9]{2})/", $datatime, $regs)) { 
       return mktime (1, 0, 0,
 		     $regs[2], $regs[3], $regs[1]);
     }
@@ -1310,7 +1317,7 @@ class plot {
   var $line_width = 1;
   var $output_data = false;
 
-  function plot ($c1, $c2) {
+  function __construct ($c1, $c2) {
     $this->coords[] = $c1;
     $this->coords[] = $c2;
     if ($c2 == 0) {
@@ -1444,7 +1451,7 @@ class plot {
 	$h = $width+2;
       else
 	$h = $height+2;
-      if (ereg(",", $this->color)) {
+      if (preg_match("/,/", $this->color)) {
 	$gcolors = explode(",", $this->color);
 	for ($i = 0; $i < sizeof($gcolors) - 1; $i++)
 	  $gacolors[] = array($gcolors[$i], $gcolors[$i+1]);
@@ -1698,7 +1705,7 @@ class plot {
       
     }
     if ($output_data) {
-      $chart->output_data[] = &$output_data;
+      $chart->output_data[] = $output_data;
       $chart->ymin = $ymin;
       $chart->ymax = $ymax;
       $chart->yoff = $yoff;
