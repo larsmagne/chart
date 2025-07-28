@@ -1,4 +1,4 @@
-<?
+<?php
 require('chart.php');
 require('data.php');
 

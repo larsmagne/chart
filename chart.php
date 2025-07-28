@@ -1,4 +1,4 @@
-<?
+<?php
 // Copyright (C) 1999, 2000, 2001, 2013 Lars Magne Ingebrigtsen
 //
 // Chart is free software; you can redistribute it and/or modify
