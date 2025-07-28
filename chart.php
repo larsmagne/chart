@@ -195,7 +195,7 @@ class chart {
     }
     // If this image has already been cached, then we just spew
     // it out and exit.
-    if (false && $cache)
+    if ($cache)
       $this->get_cache($cache);
     // If not, we initialize this object and allow execution to continue.
     $this->x_size = $x;
@@ -309,6 +309,7 @@ class chart {
   }
 
   function make_directory ($file) {
+    $dirs = array();
     while (! (file_exists($file))) {
       $dirs[] = $file;
       $file = dirname($file);
